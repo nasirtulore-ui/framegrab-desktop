@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; script-src 'self'" />
+  <title>FrameGrab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,560;9..144,680&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebrand">
+        <div class="brandmark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11m-4-4 4 4 4-4M4 17v3h16v-3"/></svg>
+        </div>
+        <div>
+          <strong>FrameGrab</strong>
+          <span>DESKTOP</span>
+        </div>
+      </div>
+      <div class="side-label">WORKSPACE</div>
+      <nav>
+        <button class="nav active" data-view="add"><span class="nav-ico">＋</span> Add videos</button>
+        <button class="nav" data-view="queue"><span class="nav-ico">☰</span> Queue <span class="nav-count" id="queueCount">0</span></button>
+        <button class="nav" data-view="settings"><span class="nav-ico">⚙</span> Settings</button>
+      </nav>
+      <div class="side-bottom">
+        Local download engine
+        <small id="binStatus">Checking yt-dlp…</small>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <section id="view-add" class="view">
+        <header class="workspace-header">
+          <div>
+            <div class="eyebrow"><span class="online-dot"></span> AUTHORIZED MEDIA WORKSPACE</div>
+            <h1>FrameGrab</h1>
+            <p>Paste permitted YouTube or media URLs. We resolve real formats and subtitles — or tell you clearly when access is refused.</p>
+          </div>
+          <button type="button" class="outline" id="pasteClipboard">Paste from clipboard</button>
+        </header>
+
+        <div class="work-content">
+          <div class="panel hero-panel">
+            <div class="section-heading"><span>01 / VIDEOS</span><span class="muted" id="countLabel">0 ADDED</span></div>
+            <div id="videoFields" class="video-fields" aria-label="Video URL list"></div>
+            <button type="button" id="addVideo" class="add-video">＋ Add another video</button>
+
+            <div class="divider"></div>
+            <div class="section-heading"><span>02 / DOWNLOAD SETTINGS</span><span class="muted">BATCH DEFAULTS</span></div>
+            <div class="two-col">
+              <div>
+                <label class="field-label" for="format">Preferred format</label>
+                <select id="format">
+                  <option value="MP4">MP4</option>
+                  <option value="SOURCE">Best available</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="quality">Preferred quality</label>
+                <select id="quality">
+                  <option value="1080">1080p</option>
+                  <option value="2160">2160p</option>
+                  <option value="1440">1440p</option>
+                  <option value="720">720p</option>
+                  <option value="480">480p</option>
+                  <option value="360">360p</option>
+                  <option value="best">Best available</option>
+                </select>
+              </div>
+            </div>
+            <p class="micro">Quality is capped to what the source actually offers. Unavailable heights are skipped automatically.</p>
+
+            <div class="divider"></div>
+            <label class="field-label" for="subtitle">Subtitles</label>
+            <select id="subtitle">
+              <option value="">N/A — no subtitles</option>
+            </select>
+            <p class="micro" id="subtitleHint">N/A by default. After analysis, available languages appear per video or as a batch default.</p>
+
+            <div class="folder-row">
+              <div>
+                <label class="field-label">Save to</label>
+                <div class="folder-path" id="folderPath">Downloads / FrameGrab</div>
+              </div>
+              <button type="button" class="outline" id="pickFolder">Change folder</button>
+            </div>
+
+            <button type="button" class="primary" id="download" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></svg>
+              <span id="downloadLabel">Download</span>
+              <span class="arrow">↗</span>
+            </button>
+            <div id="message" class="message" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-queue" class="view" hidden>
+        <header class="workspace-header">
+          <div>
+            <div class="eyebrow">ACTIVITY</div>
+            <h1>Download queue</h1>
+            <p>Live progress from the local engine. Pause isn’t universal — cancel and retry when needed.</p>
+          </div>
+          <div class="toolbar-actions">
+            <button type="button" class="outline" id="clearFinished">Clear finished</button>
+            <button type="button" class="outline" id="openFolder">Open folder</button>
+          </div>
+        </header>
+        <div class="work-content">
+          <div class="metrics" id="metrics">
+            <div class="metric"><span>Queued</span><strong id="mQueued">0</strong></div>
+            <div class="metric"><span>Active</span><strong id="mActive">0</strong></div>
+            <div class="metric"><span>Done</span><strong id="mDone">0</strong></div>
+          </div>
+          <div class="table-panel">
+            <div class="table-toolbar">
+              <div>
+                <h2>Jobs</h2>
+                <p>Newest first. Failures keep the original error from the source.</p>
+              </div>
+            </div>
+            <div class="job-list" id="jobList">
+              <div class="empty">No downloads yet.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-settings" class="view" hidden>
+        <header class="workspace-header">
+          <div>
+            <div class="eyebrow">PREFERENCES</div>
+            <h1>Settings</h1>
+            <p>Defaults for new batches. Per-video overrides still apply on the Add screen after analysis.</p>
+          </div>
+        </header>
+        <div class="work-content">
+          <div class="settings-card">
+            <h2>Defaults</h2>
+            <div class="settings-grid">
+              <div>
+                <label class="field-label" for="setFormat">Format</label>
+                <select id="setFormat">
+                  <option value="MP4">MP4</option>
+                  <option value="SOURCE">Best available</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="setQuality">Quality</label>
+                <select id="setQuality">
+                  <option value="1080">1080p</option>
+                  <option value="2160">2160p</option>
+                  <option value="1440">1440p</option>
+                  <option value="720">720p</option>
+                  <option value="480">480p</option>
+                  <option value="360">360p</option>
+                  <option value="best">Best available</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="setConcurrency">Concurrent downloads</label>
+                <select id="setConcurrency">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
+            </div>
+            <div class="folder-row">
+              <div>
+                <label class="field-label">Default folder</label>
+                <div class="folder-path" id="setFolderPath">—</div>
+              </div>
+              <button type="button" class="outline" id="setPickFolder">Browse</button>
+            </div>
+            <button type="button" class="primary savebutton" id="saveSettings">Save preferences</button>
+            <p class="micro" id="settingsMsg"></p>
+          </div>
+          <div class="notice">
+            <strong>About permitted downloads</strong>
+            <p>A video being publicly viewable does not automatically mean it may be downloaded. FrameGrab uses yt-dlp for sources that expose downloadable streams. Private, DRM, age-gated, or bot-blocked videos will fail with a clear message.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

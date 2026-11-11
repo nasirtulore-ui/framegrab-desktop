@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "FrameGrab \u2014 Authorized Media Downloads",
+  "version": "0.3.0",
+  "description": "Auto-fill active-tab URLs, add multiple authorized direct media files, and save downloads with optional subtitles.",
+  "permissions": [
+    "downloads",
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "FrameGrab",
+    "default_popup": "popup.html"
+  },
+  "options_page": "manager.html",
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  }
+}

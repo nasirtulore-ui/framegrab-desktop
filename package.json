@@ -1,0 +1,79 @@
+{
+  "name": "framegrab-desktop",
+  "version": "1.0.0",
+  "description": "FrameGrab — Windows desktop media download manager for permitted YouTube and direct media downloads",
+  "main": "electron/main.js",
+  "author": "FrameGrab",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "test": "node --test tests/*.test.js",
+    "fetch-bins": "node scripts/fetch-bins.js",
+    "pack": "npm run fetch-bins && electron-builder --dir",
+    "dist": "npm run fetch-bins && electron-builder --win nsis",
+    "dist:portable": "npm run fetch-bins && electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.framegrab.desktop",
+    "productName": "FrameGrab",
+    "directories": {
+      "output": "dist",
+      "buildResources": "resources"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/bin",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/icons",
+        "to": "icons",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "resources/icons/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "FrameGrab",
+      "artifactName": "FrameGrab-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "FrameGrab-Portable-${version}.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}

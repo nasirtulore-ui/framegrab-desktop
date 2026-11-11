@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FrameGrab</title><link rel="stylesheet" href="styles.css"></head><body class="popup"><main class="shell">
+  <header class="topbar"><div class="brand"><div class="brandmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11m-4-4 4 4 4-4M4 17v3h16v-3"/></svg></div><div><strong>FrameGrab</strong><span>MEDIA WORKSPACE</span></div></div><button id="openManager" class="iconbtn" aria-label="Open download manager" title="Open download manager"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M10 4v16"/></svg></button></header>
+  <div class="intro"><div class="eyebrow"><span class="online-dot"></span> DIRECT MEDIA DOWNLOADER</div><h1>Download with<br><em>clarity.</em></h1><p>Save media you're authorized to download. A clean workflow, without the clutter.</p></div>
+  <section class="panel">
+    <div class="section-heading"><span>01 / VIDEOS</span><span class="muted" id="countLabel">0 ADDED</span></div>
+    <div id="pageTitle" class="page-title">Checking active tab…</div>
+    <p id="sourceInfo" class="helper">The active tab URL is filled automatically. Add more URLs below.</p>
+    <div id="videoFields" class="video-fields" aria-label="Video URL list"></div>
+    <button type="button" id="addVideo" class="add-video">＋ Add another video</button>
+    <p class="micro">Adding a URL creates a new field. Duplicate URLs are skipped. Supported direct media downloads only; YouTube links are recognized but not extracted.</p>
+    <div class="divider"></div>
+    <div class="section-heading"><span>02 / DOWNLOAD SETTINGS</span><span class="muted">BATCH SETTINGS</span></div>
+    <div class="two-col"><div><label class="field-label" for="format">Preferred format</label><select id="format"><option value="MP4">MP4</option><option value="SOURCE">Original file</option></select></div><div><label class="field-label" for="quality">Preferred quality</label><select id="quality"><option>1080p</option><option>2160p</option><option>1440p</option><option>720p</option><option>480p</option><option>360p</option></select></div></div>
+    <p class="micro">Preferences only: source files download without conversion or resolution changes.</p>
+    <div class="divider"></div>
+    <label class="field-label" for="subtitle">Subtitles</label>
+    <select id="subtitle" aria-label="Subtitle language"><option value="">N/A — no subtitles</option></select>
+    <p class="micro" id="subtitleHint">N/A by default. English appears when an authorized direct caption URL is discovered.</p>
+    <button type="button" class="primary" id="download" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></svg><span id="downloadLabel">Download</span><span class="arrow">↗</span></button>
+    <p class="micro">Each download opens your browser's Save As prompt so you can choose the folder and filename. A selected caption track is downloaded as a separate file.</p>
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+  </section>
+  <section class="queue-preview"><div class="queue-title"><div><span class="section-heading">03 / ACTIVITY</span><h2>Recent downloads</h2></div><button class="textbutton" id="viewQueue">View all <span>↗</span></button></div><div id="recent" class="recent-list"><div class="empty">No downloads yet. Your queue will appear here.</div></div></section><footer>LOCAL-FIRST <span>·</span> AUTHORIZED DIRECT DOWNLOADS <span class="footer-right">v0.3</span></footer>
+</main><script src="shared.js"></script><script src="popup.js"></script></body></html>
