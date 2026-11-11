@@ -7,12 +7,25 @@ The earlier Chrome extension could only download direct `.mp4` / `.webm` links. 
 ## Features
 
 - Multi-URL batch list with “Add another video”
+- **Built-in trimmer** (Enable Trimmer) — Premiere-style in/out selection on the timeline; only the selected section downloads via yt-dlp `--download-sections`
 - Clipboard paste for YouTube links
 - Real format / quality options from yt-dlp analysis (no fake 1080p claims)
 - Subtitles default to **N/A**; pick a language when tracks exist
 - Folder picker for batch saves
 - Queue with live progress, cancel, retry, and clear finished
+- **Local companion bridge** on `127.0.0.1:17831` for the browser extension
 - Installable Windows `.exe` via electron-builder (NSIS)
+
+## Can the browser extension download YouTube alone?
+
+**No — not reliably under Manifest V3.** A Chrome/Edge extension cannot host yt-dlp or a real stream extractor inside the browser sandbox. What *does* work:
+
+1. Keep **FrameGrab Desktop** running (it owns yt-dlp + FFmpeg).
+2. Load **`companion-extension/`** unpacked in `chrome://extensions`.
+3. Copy the **bridge token** from FrameGrab → Settings.
+4. On a watch page, open the companion popup → **Send to FrameGrab**.
+
+The extension only sends the URL to the local desktop API. The desktop app does the download.
 
 ## Honesty / limits
 
@@ -56,16 +69,17 @@ Binaries (`yt-dlp`, `FFmpeg`) are fetched at build time and bundled into the ins
 node scripts/smoke-download.js
 ```
 
-Uses a short Creative Commons Big Buck Bunny sample (or a direct MP4). Requires binaries from `fetch-bins`.
+Uses a short public sample MP4. Requires binaries from `fetch-bins`.
 
 ## Project layout
 
 ```
-electron/          main process, queue, yt-dlp wrapper
-src/               renderer UI
-resources/bin/     yt-dlp.exe + ffmpeg.exe (fetched, not in git)
-reference/         legacy extension UI (reference only)
-tests/             unit tests for progress/error helpers
+electron/               main process, queue, yt-dlp, localhost bridge
+src/                    renderer UI + trimmer timeline
+companion-extension/    Chrome/Edge companion (talks to desktop)
+resources/bin/          yt-dlp.exe + ffmpeg.exe (fetched, not in git)
+reference/              legacy extension UI (reference only)
+tests/                  unit tests
 ```
 
 ## License

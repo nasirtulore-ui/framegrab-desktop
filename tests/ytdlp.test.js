@@ -8,6 +8,7 @@ const {
   buildQualityOptions,
   buildSubtitleOptions,
   pickFormatSelector,
+  formatSectionTime,
 } = require('../electron/engine/ytdlp');
 
 describe('parseProgressLine', () => {
@@ -74,5 +75,12 @@ describe('pickFormatSelector', () => {
     const s = pickFormatSelector('1080', true);
     assert.match(s, /height<=1080/);
     assert.match(s, /ext=mp4/);
+  });
+});
+
+describe('formatSectionTime', () => {
+  it('formats seconds for yt-dlp download-sections', () => {
+    assert.equal(formatSectionTime(90), '00:01:30');
+    assert.equal(formatSectionTime(3661), '01:01:01');
   });
 });

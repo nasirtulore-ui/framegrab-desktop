@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('framegrab', {
   openPath: (p) => ipcRenderer.invoke('shell:openPath', p),
   showItem: (p) => ipcRenderer.invoke('shell:showItem', p),
   updateEngine: () => ipcRenderer.invoke('engine:update'),
+  regenerateToken: () => ipcRenderer.invoke('bridge:regenerateToken'),
   onStateChanged: (cb) => {
     const handler = (_e, state) => cb(state);
     ipcRenderer.on('state:changed', handler);

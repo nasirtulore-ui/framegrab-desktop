@@ -6,10 +6,13 @@ const fs = require('fs');
 const { QueueStore } = require('./queue');
 const { YtDlpEngine } = require('./engine/ytdlp');
 const { resolveYtDlp, resolveFfmpeg, iconPath } = require('./paths');
+const { createBridge } = require('./bridge');
 
 let mainWindow = null;
 let store = null;
 let engine = null;
+let bridge = null;
+let bridgeInfo = { running: false, port: 17831 };
 let pumping = false;
 
 function send(channel, payload) {
@@ -22,17 +25,18 @@ function broadcastState() {
   send('state:changed', {
     settings: store.getSettings(),
     jobs: store.listJobs(),
+    bridge: bridgeInfo,
   });
 }
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1180,
-    height: 780,
-    minWidth: 960,
-    minHeight: 640,
+    width: 1280,
+    height: 860,
+    minWidth: 1020,
+    minHeight: 700,
     title: 'FrameGrab',
-    backgroundColor: '#eef3ef',
+    backgroundColor: '#e8f0ea',
     icon: iconPath(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -100,10 +104,44 @@ async function pumpQueue() {
   }
 }
 
+async function enqueueItems(payload) {
+  const items = Array.isArray(payload?.items) ? payload.items : [];
+  if (!items.length) throw new Error('No videos to download.');
+  let outputDir = payload.outputDir || store.getSettings().downloadDir;
+  if (!outputDir) {
+    if (!mainWindow) throw new Error('No download folder configured.');
+    const picked = await dialog.showOpenDialog(mainWindow, {
+      title: 'Choose where to save downloads',
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    if (picked.canceled || !picked.filePaths[0]) {
+      throw new Error('Download cancelled — no folder selected.');
+    }
+    outputDir = picked.filePaths[0];
+    store.updateSettings({ downloadDir: outputDir });
+  }
+  const created = store.addJobs(
+    items.map((it) => ({
+      ...it,
+      outputDir,
+      format: it.format || store.getSettings().format,
+      quality: it.quality || store.getSettings().quality,
+      subtitle: it.subtitle ?? store.getSettings().subtitle,
+      trimEnabled: !!it.trimEnabled,
+      trimStart: it.trimStart,
+      trimEnd: it.trimEnd,
+    }))
+  );
+  broadcastState();
+  setImmediate(pumpQueue);
+  return created;
+}
+
 function registerIpc() {
   ipcMain.handle('app:getState', () => ({
     settings: store.getSettings(),
     jobs: store.listJobs(),
+    bridge: bridgeInfo,
     bins: {
       ytDlp: resolveYtDlp(),
       ffmpeg: resolveFfmpeg(),
@@ -147,34 +185,7 @@ function registerIpc() {
     }
   });
 
-  ipcMain.handle('queue:enqueue', async (_e, payload) => {
-    const items = Array.isArray(payload?.items) ? payload.items : [];
-    if (!items.length) throw new Error('No videos to download.');
-    let outputDir = payload.outputDir || store.getSettings().downloadDir;
-    if (!outputDir) {
-      const picked = await dialog.showOpenDialog(mainWindow, {
-        title: 'Choose where to save downloads',
-        properties: ['openDirectory', 'createDirectory'],
-      });
-      if (picked.canceled || !picked.filePaths[0]) {
-        throw new Error('Download cancelled — no folder selected.');
-      }
-      outputDir = picked.filePaths[0];
-      store.updateSettings({ downloadDir: outputDir });
-    }
-    const created = store.addJobs(
-      items.map((it) => ({
-        ...it,
-        outputDir,
-        format: it.format || store.getSettings().format,
-        quality: it.quality || store.getSettings().quality,
-        subtitle: it.subtitle ?? store.getSettings().subtitle,
-      }))
-    );
-    broadcastState();
-    setImmediate(pumpQueue);
-    return created;
-  });
+  ipcMain.handle('queue:enqueue', (_e, payload) => enqueueItems(payload || {}));
 
   ipcMain.handle('queue:cancel', (_e, id) => {
     engine.cancel(id);
@@ -230,9 +241,49 @@ function registerIpc() {
     await engine.selfUpdate();
     return true;
   });
+
+  ipcMain.handle('bridge:regenerateToken', () => {
+    store.updateSettings({ bridgeToken: '' });
+    const token = store.ensureBridgeToken();
+    broadcastState();
+    return token;
+  });
 }
 
-app.whenReady().then(() => {
+async function startBridge() {
+  const settings = store.getSettings();
+  const port = Number(settings.bridgePort) || 17831;
+  store.ensureBridgeToken();
+  if (!settings.bridgeEnabled) {
+    bridgeInfo = { running: false, port };
+    return;
+  }
+  bridge = createBridge({
+    port,
+    getToken: () => store.ensureBridgeToken(),
+    onAnalyze: (url) => engine.analyze(String(url || '').trim()),
+    onEnqueue: (body) => enqueueItems(body || {}),
+    onListJobs: () => store.listJobs(),
+    onGetSettings: () => {
+      const s = store.getSettings();
+      return {
+        format: s.format,
+        quality: s.quality,
+        downloadDir: s.downloadDir,
+        bridgePort: s.bridgePort,
+      };
+    },
+  });
+  try {
+    await bridge.start();
+    bridgeInfo = { running: true, port };
+  } catch (err) {
+    console.error('Bridge failed to start', err);
+    bridgeInfo = { running: false, port, error: err.message };
+  }
+}
+
+app.whenReady().then(async () => {
   store = new QueueStore(app.getPath('userData'));
   if (!store.getSettings().downloadDir) {
     store.updateSettings({
@@ -244,12 +295,14 @@ app.whenReady().then(() => {
     ffmpegPath: resolveFfmpeg(),
   });
   registerIpc();
+  await startBridge();
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
+  if (bridge) await bridge.stop();
   if (process.platform !== 'darwin') app.quit();
 });

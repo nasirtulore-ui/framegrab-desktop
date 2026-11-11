@@ -11,6 +11,9 @@ const DEFAULT_SETTINGS = {
   downloadDir: '',
   concurrency: 1,
   autoUpdateYtDlp: false,
+  bridgeEnabled: true,
+  bridgePort: 17831,
+  bridgeToken: '',
 };
 
 class QueueStore {
@@ -64,6 +67,14 @@ class QueueStore {
     return this.state.jobs.find((j) => j.id === id) || null;
   }
 
+  ensureBridgeToken() {
+    if (!this.state.settings.bridgeToken) {
+      this.state.settings.bridgeToken = randomUUID().replace(/-/g, '');
+      this.save();
+    }
+    return this.state.settings.bridgeToken;
+  }
+
   addJobs(entries) {
     const created = entries.map((e) => ({
       id: randomUUID(),
@@ -74,6 +85,9 @@ class QueueStore {
       quality: e.quality || this.state.settings.quality,
       subtitle: e.subtitle ?? this.state.settings.subtitle,
       outputDir: e.outputDir || this.state.settings.downloadDir,
+      trimEnabled: !!e.trimEnabled,
+      trimStart: Number.isFinite(e.trimStart) ? e.trimStart : null,
+      trimEnd: Number.isFinite(e.trimEnd) ? e.trimEnd : null,
       status: 'queued',
       percent: 0,
       speed: null,

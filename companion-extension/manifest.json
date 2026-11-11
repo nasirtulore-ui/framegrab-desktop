@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "FrameGrab Companion",
+  "version": "1.0.0",
+  "description": "Send the current tab URL to FrameGrab Desktop via the local bridge.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["http://127.0.0.1:17831/*", "http://localhost:17831/*"],
+  "action": {
+    "default_title": "FrameGrab Companion",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  }
+}

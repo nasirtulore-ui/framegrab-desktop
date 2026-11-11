@@ -12,3 +12,5 @@ resources/bin/*
 .idea/
 .env
 *.local
+
+dist2/

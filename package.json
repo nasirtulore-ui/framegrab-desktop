@@ -1,6 +1,6 @@
 {
   "name": "framegrab-desktop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "FrameGrab — Windows desktop media download manager for permitted YouTube and direct media downloads",
   "main": "electron/main.js",
   "author": "FrameGrab",

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FrameGrab Companion</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <strong>FrameGrab</strong>
+    <span>COMPANION</span>
+  </header>
+  <p class="lead">Sends this tab’s URL to the desktop app’s local download bridge. Keep FrameGrab Desktop open.</p>
+
+  <label for="token">Bridge token</label>
+  <input id="token" type="password" placeholder="Paste token from FrameGrab Settings" />
+
+  <label for="url">URL</label>
+  <input id="url" type="url" readonly />
+
+  <div class="row">
+    <button id="check" type="button" class="ghost">Check bridge</button>
+    <button id="send" type="button" class="primary">Send to FrameGrab</button>
+  </div>
+  <div id="status" class="status" role="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
