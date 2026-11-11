@@ -283,6 +283,21 @@ select {
   font-size: 11px;
 }
 .video-entry input { background: #fff; margin-bottom: 8px; }
+.entry-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chip {
+  background: #eef6f0;
+  border: 1px solid #d7e8dc;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #3d6b52;
+  padding: 4px 9px;
+}
+.err-chip {
+  color: #b1433a;
+  border-color: #f0c7c2;
+  background: #fff5f3;
+}
 .meta-row {
   display: grid;
   grid-template-columns: 72px 1fr;
